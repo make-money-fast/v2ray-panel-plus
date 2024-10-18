@@ -1,0 +1,6 @@
+{
+  "socksAddress": "0.0.0.0",
+  "socksPort": 10080,
+  "httpAddress": "0.0.0.0",
+  "httpPort": 10081
+}

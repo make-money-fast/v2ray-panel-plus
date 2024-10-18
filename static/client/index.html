@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>V2ray Panel Plus</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/element.min.css">
+    <link rel="shortcut icon" href="/static/favicon.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container mx-auto w-50 py-2 mt-4">
+    <el-card>
+        <el-dropdown split-button type="primary" @command="handleMenuClick" class="mx-2">
+            新增配置
+            <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="init">初始化配置</el-dropdown-item>
+                <el-dropdown-item command="vmess">Vmess导入</el-dropdown-item>
+                <el-dropdown-item command="import">配置导入</el-dropdown-item>
+            </el-dropdown-menu>
+        </el-dropdown>
+        <el-button @click="handleLocalConfigClick" type="primary">
+            本地设置
+        </el-button>
+        <el-button @click="autoTestTimeLine" type="primary" v-loading.fullscreen.lock="fullscreenLoading">
+            代理测试
+        </el-button>
+        <el-button @click="stopProgress" type="danger">
+            关闭程序
+        </el-button>
+    </el-card>
+    <div class="d-flex flex-column mt-2">
+        <el-card class="w-100 mt-1" v-for="item in configList" :key="item.uuid">
+            <div class="d-flex flex-row justify-content-between align-content-center">
+                <div class="left">
+                    <p>{{ item.alias }}</p>
+                    <el-tag type="primary">{{ item.host }}:{{ item.port }}</el-tag>
+                    <el-tag type="primary">{{ item.protocol }}</el-tag>
+                    <el-tag type="danger" v-if="item.status === 0">未启动</el-tag>
+                    <el-tag type="success" v-if="item.status === 1">运行中</el-tag>
+                </div>
+                <div class="d-flex" style="height: 28px;">
+                    <el-link class="px-2" type="success" v-if="item.status === 0" @click="handleReload(item)">
+                        启动
+                    </el-link>
+                    <el-link class="px-2" type="warning" v-if="item.status === 1" @click="handleReload(item)">
+                        重启
+                    </el-link>
+                    <el-link class="px-2" type="danger" @click="handleStopClick" v-if="item.status === 1">
+                        停止
+                    </el-link>
+                    <el-link class="px-2" type="primary" @click="handleShare(item)">
+                        分享
+                    </el-link>
+                    <el-link class="px-2" type="primary" @click="handleEditClick(item)">
+                        编辑
+                    </el-link>
+                    <el-link class="px-2" type="primary" @click="getConfigJson(item)">
+                        配置文件
+                    </el-link>
+                    <el-link class="px-2" type="danger" slot="reference" @click="handleDelete(item)">
+                        删除
+                    </el-link>
+                </div>
+            </div>
+        </el-card>
+    </div>
+
+    <!-- 配置编辑 -->
+    <el-drawer
+            title="编辑配置"
+            :visible.sync="configDrawer"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-form :model="editConfig" :rules="rules" ref="editConfig" label-width="80px">
+            <el-form-item label="别名" prop="alias" label-width="120px">
+                <el-input v-model="editConfig.alias" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="服务器地址" label-width="120px" prop="host">
+                <el-input v-model="editConfig.host" class="w-75"></el-input>
+            </el-form-item>
+
+            <el-form-item label="端口" label-width="120px" prop="port">
+                <el-input v-model="editConfig.port" class="w-75"></el-input>
+            </el-form-item>
+
+            <el-form-item label="id" label-width="120px" prop="id">
+                <el-input v-model="editConfig.id" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="协议" label-width="120px" prop="network">
+                <el-select v-model="editConfig.network" class="w-75">
+                    <el-option v-for="item in protocolList" :key="item" :value="item" :label="item"></el-option>
+                </el-select>
+            </el-form-item>
+            <div v-if="editConfig.network === 'ws'">
+                <el-divider content-position="center" class="w-75 mx-auto" prop="settings.wsSettings.path">
+                    Websocket配置
+                </el-divider>
+                <el-form-item label="path" label-width="120px">
+                    <el-input v-model="editConfig.settings.wsSettings.path" class="w-75"></el-input>
+                </el-form-item>
+            </div>
+            <div v-if="editConfig.network === 'kcp'">
+                <el-divider content-position="center" class="w-75 mx-auto" prop="settings.kcpSettings.uplinkCapacity">
+                    KCP配置
+                </el-divider>
+                <el-form-item label="uplinkCapacity" label-width="120px">
+                    <el-input v-model="editConfig.settings.kcpSettings.uplinkCapacity" class="w-75"></el-input>
+                </el-form-item>
+                <el-form-item label="path" label-width="120px" prop="settings.kcpSettings.downlinkCapacity">
+                    <el-input v-model="editConfig.settings.kcpSettings.downlinkCapacity" class="w-75"></el-input>
+                </el-form-item>
+                <el-form-item label="伪装类型" label-width="120px" prop="settings.kcpSettings.header.type">
+                    <el-select v-model="editConfig.settings.kcpSettings.header.type" class="w-75">
+                        <el-option v-for="item in headers" :key="item" :value="item" :label="item"></el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <el-form-item>
+                <el-button type="primary" @click="onConfigEdit('editConfig')">更新</el-button>
+                <el-button type="danger" @click="onConfigCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-drawer>
+
+    <el-drawer
+            title="本地配置"
+            :visible.sync="localConfigDrawer"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-form :model="localConfig" :rules="localRules" ref="localConfig" label-width="80px">
+            <el-form-item label="socks监听地址" prop="alias" label-width="120px">
+                <el-input v-model="localConfig.socksAddress" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="socks端口" prop="alias" label-width="120px">
+                <el-input v-model.number="localConfig.socksPort" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="http监听地址" prop="alias" label-width="120px">
+                <el-input v-model="localConfig.httpAddress" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="http端口" label-width="120px" prop="host">
+                <el-input v-model.number="localConfig.httpPort" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onLocalConfigEdit('localConfig')">更新</el-button>
+                <el-button type="danger" @click="onLocalConfigCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+
+        <div class="mt-4 p-4 bg-secondary-subtle text-dark">
+            <p>
+                http代理地址:  <el-tag type="success">http://{{localConfig.httpAddress }}:{{ localConfig.httpPort }}</el-tag>
+            </p>
+            <p>
+                socks代理: <el-tag type="success">socks5://{{localConfig.socksAddress }}:{{ localConfig.socksPort }}</el-tag>
+            </p>
+        </div>
+
+
+    </el-drawer>
+
+    <el-drawer
+            title="测试访问结果"
+            :visible.sync="stateDrawer"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-timeline>
+            <el-timeline-item
+                    v-for="(activity, index) in state"
+                    :key="index"
+                    :icon="activity.icon"
+                    :type="activity.type"
+                    :color="activity.color"
+                    :size="activity.size"
+                    :timestamp="activity.timestamp">
+                {{activity.content}}
+            </el-timeline-item>
+        </el-timeline>
+    </el-drawer>
+
+    <el-drawer
+            title="导入Vmess"
+            :visible.sync="vmessImportDrawer"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-form :model="vmessImport" :rules="vmessImportRule" ref="vmessImport" label-width="80px">
+            <el-form-item label="vmess地址" prop="alias" label-width="120px">
+                <el-input v-model="vmessImport.vmess" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onVmessImportEdit('vmessImport')">更新</el-button>
+                <el-button type="danger" @click="onVmessImportCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-drawer>
+
+    <el-drawer
+            title="分享"
+            :visible.sync="vmessShare"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-card>
+            <div class="border-2 bg-secondary-subtle text-white p-2 rounded-2">
+                <code>{{ vmessShareItem.link }}</code>
+            </div>
+            <div class="mt-2 mx-auto text-center">
+                <img :src="vmessShareItem.qrCode" alt="">
+            </div>
+        </el-card>
+    </el-drawer>
+
+    <el-drawer
+            title="查看配置文件"
+            :visible.sync="configJsonDrawer"
+            size="630px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-card>
+            <div class="border-2 bg-secondary-subtle text-dark p-2 rounded-2" v-html="configJson">
+            </div>
+        </el-card>
+    </el-drawer>
+
+    <el-drawer
+            title="导入配置文件"
+            :visible.sync="configJsonImportDrawer"
+            size="630px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-form :model="configImportConfig" class="px-4" :rules="configImportConfigRule" ref="configImportConfig" label-width="80px">
+            <p>配置文件json</p>
+            <el-input
+                    type="textarea"
+                    :rows="2"
+                    :autosize="{ minRows: 10,maxRows: 20}"
+                    placeholder="请输入内容"
+                    v-model="configImportConfig.config">
+            </el-input>
+            <el-form-item class="mt-2">
+                <el-button type="primary" @click="onConfigImportFormSubmit('configImportConfig')">更新</el-button>
+                <el-button type="danger" @click="onConfigImportFormCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-drawer>
+
+</div>
+<script src="/static/js/axios.min.js"></script>
+<script src="/static/js/vue.min.js"></script>
+<script src="/static/js/clipboard.min.js"></script>
+<script src="/static/js/element-ui.js"></script>
+<script src="/static/js/client.js"></script>
+</body>
+</html>
