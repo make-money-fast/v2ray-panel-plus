@@ -15,6 +15,7 @@ import (
 	"v2ray-panel-plus/pkg/helpers"
 	"v2ray-panel-plus/pkg/menu"
 	"v2ray-panel-plus/pkg/runtime/client"
+	"v2ray-panel-plus/pkg/system"
 	"v2ray-panel-plus/pkg/vo"
 )
 
@@ -176,6 +177,14 @@ func reload(ctx *gin.Context) {
 		sendError(ctx, errors.Wrap(err, "更新配置失败"))
 		return
 	}
+	rs, err := conf.GetRunningStatus()
+	if err != nil {
+		sendError(ctx, errors.Wrap(err, "读取配置失败"))
+		return
+	}
+	rs.RunningUUID = req.UUID
+	conf.SetRunningStatus(rs)
+
 	sendSuccess(ctx, true)
 }
 
@@ -464,4 +473,45 @@ func configImport(ctx *gin.Context) {
 func shutdown(ctx *gin.Context) {
 	sendSuccess(ctx, true)
 	menu.Shutdown()
+}
+
+func systemProxyStatus(ctx *gin.Context) {
+	status := system.GetProxyStatus()
+	mode := system.GetMode()
+	sendSuccess(ctx, map[string]interface{}{
+		"status":     status,
+		"mode":       mode,
+		"pacAddress": GetPacAddress(),
+	})
+}
+
+func Pacjs(ctx *gin.Context) {
+	ctx.Header("Content-type", "application/x-ns-proxy-autoconfig")
+	ctx.String(200, conf.ParsePacJS())
+}
+
+type SetProxyRequest struct {
+	Mode int `json:"mode"`
+}
+
+func setProxy(ctx *gin.Context) {
+	var req SetProxyRequest
+	if err := ctx.Bind(&req); err != nil {
+		sendError(ctx, errors.Wrap(err, "参数绑定失败"))
+		return
+	}
+	var err error
+	switch req.Mode {
+	case system.ModeNone:
+		err = system.SetNone()
+	case system.ModePac:
+		err = system.SetPac(GetPacAddress())
+	case system.ModeGlobal:
+		err = system.SetGlobal()
+	}
+	if err != nil {
+		sendError(ctx, errors.Wrap(err, "操作失败"))
+		return
+	}
+	sendSuccess(ctx, true)
 }

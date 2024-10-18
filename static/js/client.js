@@ -121,14 +121,44 @@ new Vue({
                 config: [
                     {required: true, message: '请输入json', trigger: 'blur'},
                 ]
+            },
+            proxyStatus: {
+                mode: 0,
+                status: 0,
             }
         }
     },
     mounted() {
         this.getConfigList();
-        this.initLocalConfig()
+        this.initLocalConfig();
+        this.getSystemProxyStatus();
     },
     methods: {
+        async getSystemProxyStatus() {
+            let rsp = await this.post('/api/systemProxyStatus')
+            this.proxyStatus = {
+                mode: rsp.mode,
+                status: rsp.status,
+                pacAddress: '',
+            }
+        },
+        async setProxy(mode) {
+            let rsp = await  this.post("/api/setProxy",{mode: mode})
+            if(rsp) {
+                await this.getSystemProxyStatus();
+            }
+        },
+        async handleProxyClick(command) {
+            if (command === "pac") {
+                await this.setProxy(2)
+            }
+            if (command == 'global') {
+                await this.setProxy(1)
+            }
+            if (command == 'close') {
+                await this.clearProxy()
+            }
+        },
         async stopProgress() {
             let rsp = this.post('/api/shutdown', {})
             if (rsp) {

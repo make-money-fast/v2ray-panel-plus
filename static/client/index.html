@@ -18,7 +18,7 @@
 <body>
 <div id="app" class="container mx-auto w-50 py-2 mt-4">
     <el-card>
-        <el-dropdown split-button type="primary" @command="handleMenuClick" class="mx-2">
+        <el-dropdown split-button type="default" @command="handleMenuClick" class="mx-2">
             新增配置
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="init">初始化配置</el-dropdown-item>
@@ -26,12 +26,20 @@
                 <el-dropdown-item command="import">配置导入</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
-        <el-button @click="handleLocalConfigClick" type="primary">
+        <el-button @click="handleLocalConfigClick" type="default">
             本地设置
         </el-button>
-        <el-button @click="autoTestTimeLine" type="primary" v-loading.fullscreen.lock="fullscreenLoading">
+        <el-button @click="autoTestTimeLine" type="default" v-loading.fullscreen.lock="fullscreenLoading">
             代理测试
         </el-button>
+        <el-dropdown split-button :type="proxyStatus.status == 0 ? 'default' : 'success' " @command="handleProxyClick" class="mx-2">
+            系统代理 <i v-if="proxyStatus.status == 1" class="el-icon-check"></i>
+            <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="pac">pac <i v-if="proxyStatus.mode == 2" class="el-icon-check"></i></el-dropdown-item>
+<!--                <el-dropdown-item command="global">全局 <i v-if="proxyStatus.mode == 1" class="el-icon-check"></i></el-dropdown-item>-->
+                <el-dropdown-item command="close">清除代理</el-dropdown-item>
+            </el-dropdown-menu>
+        </el-dropdown>
         <el-button @click="stopProgress" type="danger">
             关闭程序
         </el-button>

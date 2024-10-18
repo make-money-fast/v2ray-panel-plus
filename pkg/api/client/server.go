@@ -6,6 +6,8 @@ import (
 	"github.com/phayes/freeport"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 	v2ray_panel_plus "v2ray-panel-plus"
 	"v2ray-panel-plus/pkg/menu"
 )
@@ -42,8 +44,11 @@ func StartHttpServer() {
 		api.POST("/configJSON", configJson)
 		api.POST("/config-import", configImport)
 		api.POST("/shutdown", shutdown)
+		api.POST("/systemProxyStatus", systemProxyStatus)
+		api.POST("/setProxy", setProxy)
 	}
 
+	g.GET("/proxy.pac", Pacjs)
 	g.GET("/qrcode", qrCode)
 
 	ListenAddress = "http://" + listenAddress
@@ -62,4 +67,11 @@ func getListenAddress() string {
 		port = fmt.Sprintf("%d", p)
 	}
 	return fmt.Sprintf("0.0.0.0:%s", port)
+}
+
+func GetPacAddress() string {
+	if ListenAddress == "" {
+		return ""
+	}
+	return ListenAddress + "/proxy.pac?t=" + strconv.Itoa(int(time.Now().Unix()))
 }

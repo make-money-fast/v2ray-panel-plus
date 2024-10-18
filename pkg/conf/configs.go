@@ -3,8 +3,13 @@ package conf
 import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"v2ray-panel-plus/pkg/helpers"
+	"v2ray-panel-plus/pkg/pac"
 )
 
 func CreateOneConfig(config *ClientConfig) error {
@@ -105,4 +110,52 @@ func GetActiveConfig() (*ClientConfig, error) {
 		}
 	}
 	return nil, errors.New("没有正在运行的配置")
+}
+
+func ParsePacJS() string {
+	local, err := GetLocalConfig()
+	if err != nil {
+		return ""
+	}
+	data, err := ioutil.ReadFile(GetGfwPath())
+	if err != nil {
+		return ""
+	}
+	p := pac.ParseGFW(data)
+	pacJS := p.ToPacjs("PROXY " + strings.TrimPrefix(local.HttpProxy(), "http://"))
+	return pacJS
+}
+
+type RunningStatus struct {
+	ProxyMode   int    `json:"proxy_mode"`
+	ProxyStatus int    `json:"proxy_status"`
+	RunningUUID string `json:"running_uuid"`
+}
+
+func GetStatusPath() string {
+	return filepath.Join(defaultConfigDirectory(), "status.json")
+}
+
+func InitRunningStatus() {
+	var runtimeConfig RunningStatus
+	_, err := os.Stat(GetStatusPath())
+	if err != nil {
+		if os.IsNotExist(err) {
+			helpers.WriteJSONFile(GetStatusPath(), runtimeConfig)
+		}
+		return
+	}
+}
+
+func SetRunningStatus(s *RunningStatus) error {
+	return helpers.WriteJSONFile(GetStatusPath(), s)
+}
+
+func GetRunningStatus() (*RunningStatus, error) {
+	var s RunningStatus
+	err := helpers.ReadJSONFile(GetStatusPath(), &s)
+	if err != nil {
+		return &RunningStatus{}, nil
+	}
+	return &s, nil
 }

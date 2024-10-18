@@ -60,10 +60,27 @@ func readConfigsInit() {
 func checkFile(path string, cb func() error) error {
 	_, err := os.Stat(path)
 	if err != nil {
-		if err == os.ErrNotExist {
+		if os.IsNotExist(err) {
 			return cb()
 		}
 		return err
 	}
 	return nil
+}
+
+func GetGfwPath() string {
+	return filepath.Join(defaultConfigDirectory(), "gfwlist.txt")
+}
+
+func GetActiveRuntimeConfig() string {
+	conf, err := getConfigList()
+	if err != nil {
+		return ""
+	}
+	for _, item := range conf {
+		if item.Status == StatusStart {
+			return item.UUID
+		}
+	}
+	return ""
 }

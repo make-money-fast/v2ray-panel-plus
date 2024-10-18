@@ -4,7 +4,6 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/pkg/browser"
 	"os"
-	"v2ray-panel-plus/pkg/conf"
 	"v2ray-panel-plus/pkg/runtime/client"
 )
 
@@ -30,13 +29,7 @@ func Init() {
 }
 
 func shutdown() {
-	list, _ := conf.GetConfigList()
-	for _, item := range list {
-		item.Status = conf.StatusDown
-	}
-	conf.SaveConfigList(list)
 	client.Stop()
-
 	systray.Quit()
 	os.Exit(0)
 }
