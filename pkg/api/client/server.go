@@ -16,7 +16,7 @@ var ListenAddress = ""
 
 func StartHttpServer() {
 	g := gin.Default()
-	listenAddress := getListenAddress()
+	port := getListenPort()
 
 	if os.Getenv("DEBUG") == "1" {
 		g.Static("/static", "static")
@@ -48,25 +48,26 @@ func StartHttpServer() {
 		api.POST("/setProxy", setProxy)
 	}
 
+	g.GET("/", func(ctx *gin.Context) {
+		ctx.Redirect(302, "/static/client")
+	})
 	g.GET("/proxy.pac", Pacjs)
 	g.GET("/qrcode", qrCode)
 
-	ListenAddress = "http://" + listenAddress
+	ListenAddress = "http://127.0.0.1:" + port
 	// html
-	fmt.Println("Listening on ", ListenAddress)
-	uiAddress := "http://" + listenAddress + "/static/client"
-	menu.UIAddress = uiAddress
-
-	g.Run(listenAddress)
+	fmt.Println("Servering at on ", ListenAddress)
+	menu.UIAddress = ListenAddress
+	g.Run(fmt.Sprintf(":%s", port))
 }
 
-func getListenAddress() string {
+func getListenPort() string {
 	port := os.Getenv("V2RAY_PANEL_LISTEN_ADDRESS")
 	if port == "" {
 		p, _ := freeport.GetFreePort()
 		port = fmt.Sprintf("%d", p)
 	}
-	return fmt.Sprintf("0.0.0.0:%s", port)
+	return port
 }
 
 func GetPacAddress() string {

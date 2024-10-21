@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
-func TestGetMyIP(t *testing.T) {
-	fmt.Println("my ip address is:", GetMyIP())
+func TestGetPublicIP(t *testing.T) {
+	fmt.Println("my ip address is:", GetPublicIP())
+}
+
+func TestGetInternalIP(t *testing.T) {
+	fmt.Println("my ip address is:", GetInternalIP())
 }
