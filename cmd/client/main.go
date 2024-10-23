@@ -20,6 +20,10 @@ func init() {
 }
 
 func main() {
+	run()
+}
+
+func run() {
 	systray.Run(func() {
 		ico, _ := v2ray_panel_plus.StaticFS.ReadFile("static/favicon.png")
 		go func() {
@@ -66,5 +70,4 @@ func main() {
 		systray.SetTooltip("v2-client")
 		client.StartHttpServer()
 	}, nil)
-
 }
