@@ -297,8 +297,9 @@ new Vue({
             this.editConfig.network = item.protocol;
             this.editConfig.alias = item.alias;
             this.editConfig.uuid = item.uuid;
-            if (item.network === 'kcp') {
-                this.editConfig.network.settings.kcpSettings = item.config.outbounds[0].streamSettings.kcpSettings;
+            if (item.protocol === 'kcp') {
+                console.log(item.config.outbounds[0].streamSettings.kcpSettings)
+                this.editConfig.settings.kcpSettings = item.config.outbounds[0].streamSettings.kcpSettings;
             }
         },
         async handleMenuClick(command) {

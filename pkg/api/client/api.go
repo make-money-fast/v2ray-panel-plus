@@ -89,6 +89,7 @@ func editConfig(ctx *gin.Context) {
 	config.Id = req.Id
 	config.Protocol = req.Network
 	config.Alias = req.Alias
+	config.Vmess = config.Config.GetVmess(config.Alias)
 
 	config.Config.Outbounds[0].Settings.Vnext[0].Port = helpers.Str2Int(config.Port)
 	config.Config.Outbounds[0].Settings.Vnext[0].Address = config.Host
@@ -96,10 +97,12 @@ func editConfig(ctx *gin.Context) {
 	config.Config.Outbounds[0].Settings.Vnext[0].Users[0].AlterId = 0
 	config.Config.Outbounds[0].StreamSettings.Network = req.Network
 
+	config.Config.Outbounds[0].StreamSettings.WSConfig = &conf.WebSocketConfig{}
 	if config.Protocol == "ws" {
 		config.Config.Outbounds[0].StreamSettings.WSConfig.Path = req.Settings.WsSettings.Path
 	}
 
+	config.Config.Outbounds[0].StreamSettings.KCPConfig = &conf.KCPConfig{}
 	if config.Protocol == "kcp" {
 		cap := uint32(req.Settings.KcpSettings.UplinkCapacity)
 		config.Config.Outbounds[0].StreamSettings.KCPConfig.UpCap = &cap

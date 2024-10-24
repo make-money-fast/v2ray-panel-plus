@@ -22,4 +22,4 @@ v2ray 自用客户端
 - [x] 多配置管理
 
 
-easy to use. 
+easy to use
