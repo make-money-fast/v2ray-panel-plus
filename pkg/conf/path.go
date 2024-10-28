@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
@@ -23,6 +24,10 @@ func getRuntimeConfigPath() string {
 }
 
 func InitDefaultConfigFile() {
+	if err := os.MkdirAll(defaultConfigDirectory(), 0755); err != nil {
+		fmt.Println("初始化配置文件夹失败，请手动创建文件夹：", defaultConfigDirectory())
+		os.Exit(0)
+	}
 	readConfigsInit()
 }
 
@@ -49,7 +54,7 @@ func getLocalConfigPath() string {
 func readConfigsInit() {
 	configPath := defaultConfigPath()
 	if err := checkFile(configPath, func() error {
-		return ioutil.WriteFile(configPath, []byte("{}"), 0644)
+		return ioutil.WriteFile(configPath, []byte("{}"), 0755)
 	}); err != nil {
 		log.Println("初始化配置文件失败", err)
 		os.Exit(1)

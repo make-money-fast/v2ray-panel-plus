@@ -14,7 +14,7 @@ func InitGfw(path string) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			gfw := getDefaultGfw()
-			ioutil.WriteFile(path, []byte(gfw), 0644)
+			ioutil.WriteFile(path, []byte(gfw), 0755)
 		}
 	}
 }

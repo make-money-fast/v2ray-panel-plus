@@ -26,5 +26,5 @@ func WriteJSONFile(filename string, v interface{}, intend ...bool) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(filename, data, 0755)
 }
