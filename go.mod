@@ -1,4 +1,4 @@
-module v2ray-panel-plus
+module github.com/make-money-fast/v2ray-panel-plus
 
 go 1.23.2
 

@@ -31,7 +31,6 @@ builds:
     goarch:
       - amd64
       - arm
-
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
@@ -53,3 +52,11 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+release:
+  github:
+    owner: make-money-fast
+    name: v2ray-panel-plus
+  brew:
+    tap: make-money-fast/homebrew-v2raypanel
+    formula: your_formula_name

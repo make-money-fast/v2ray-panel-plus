@@ -6,17 +6,17 @@ import (
 	"github.com/clearcodecn/vmess"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/menu"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/system"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/vo"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/skip2/go-qrcode"
 	"strconv"
 	"time"
-	"v2ray-panel-plus/pkg/conf"
-	"v2ray-panel-plus/pkg/helpers"
-	"v2ray-panel-plus/pkg/menu"
-	"v2ray-panel-plus/pkg/runtime/client"
-	"v2ray-panel-plus/pkg/system"
-	"v2ray-panel-plus/pkg/vo"
 )
 
 type Response struct {
@@ -100,15 +100,19 @@ func editConfig(ctx *gin.Context) {
 	config.Config.Outbounds[0].StreamSettings.WSConfig = &conf.WebSocketConfig{}
 	if config.Protocol == "ws" {
 		config.Config.Outbounds[0].StreamSettings.WSConfig.Path = req.Settings.WsSettings.Path
+		config.Config.Outbounds[0].StreamSettings.KCPConfig = nil
+		config.Config.Outbounds[0].StreamSettings.TCPConfig = nil
 	}
 
-	config.Config.Outbounds[0].StreamSettings.KCPConfig = &conf.KCPConfig{}
 	if config.Protocol == "kcp" {
+		config.Config.Outbounds[0].StreamSettings.KCPConfig = &conf.KCPConfig{}
+		config.Config.Outbounds[0].StreamSettings.WSConfig = nil
+		config.Config.Outbounds[0].StreamSettings.TCPConfig = nil
 		cap := uint32(req.Settings.KcpSettings.UplinkCapacity)
-		config.Config.Outbounds[0].StreamSettings.KCPConfig.UpCap = &cap
+		config.Config.Outbounds[0].StreamSettings.KCPConfig.UpCap = cap
 		cap2 := uint32(req.Settings.KcpSettings.DownlinkCapacity)
-		config.Config.Outbounds[0].StreamSettings.KCPConfig.DownCap = &cap2
-		config.Config.Outbounds[0].StreamSettings.KCPConfig.Congestion = &req.Settings.KcpSettings.Congestion
+		config.Config.Outbounds[0].StreamSettings.KCPConfig.DownCap = cap2
+		config.Config.Outbounds[0].StreamSettings.KCPConfig.Congestion = req.Settings.KcpSettings.Congestion
 		headerRaw, _ := json.Marshal(req.Settings.KcpSettings.Header)
 		var mp = make(map[string]string)
 		json.Unmarshal(headerRaw, &mp)
@@ -365,8 +369,8 @@ func importVmess(ctx *gin.Context) {
 			header["type"] = link.Type
 		}
 		clientConfig.Outbounds[0].StreamSettings.KCPConfig = &conf.KCPConfig{
-			UpCap:        &up,
-			DownCap:      &down,
+			UpCap:        up,
+			DownCap:      down,
 			HeaderConfig: header,
 		}
 	}

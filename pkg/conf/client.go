@@ -89,13 +89,13 @@ type TCPConfig struct {
 }
 
 type KCPConfig struct {
-	Mtu             *uint32           `json:"mtu"`
-	Tti             *uint32           `json:"tti"`
-	UpCap           *uint32           `json:"uplinkCapacity"`
-	DownCap         *uint32           `json:"downlinkCapacity"`
-	Congestion      *bool             `json:"congestion"`
-	ReadBufferSize  *uint32           `json:"readBufferSize"`
-	WriteBufferSize *uint32           `json:"writeBufferSize"`
+	Mtu             uint32            `json:"mtu,omitempty"`
+	Tti             uint32            `json:"tti,omitempty"`
+	UpCap           uint32            `json:"uplinkCapacity,omitempty"`
+	DownCap         uint32            `json:"downlinkCapacity,omitempty"`
+	Congestion      bool              `json:"congestion,omitempty"`
+	ReadBufferSize  uint32            `json:"readBufferSize,omitempty"`
+	WriteBufferSize uint32            `json:"writeBufferSize,omitempty"`
 	HeaderConfig    map[string]string `json:"header"`
 }
 

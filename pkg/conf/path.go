@@ -2,12 +2,12 @@ package conf
 
 import (
 	"fmt"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"v2ray-panel-plus/pkg/helpers"
 )
 
 func defaultConfigDirectory() string {

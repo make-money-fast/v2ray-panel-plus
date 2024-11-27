@@ -3,13 +3,13 @@ package client
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	v2ray_panel_plus "github.com/make-money-fast/v2ray-panel-plus"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/menu"
 	"github.com/phayes/freeport"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	v2ray_panel_plus "v2ray-panel-plus"
-	"v2ray-panel-plus/pkg/menu"
 )
 
 var ListenAddress = ""

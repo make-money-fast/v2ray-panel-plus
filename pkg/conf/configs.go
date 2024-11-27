@@ -1,6 +1,8 @@
 package conf
 
 import (
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/pac"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"io/ioutil"
@@ -8,8 +10,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"v2ray-panel-plus/pkg/helpers"
-	"v2ray-panel-plus/pkg/pac"
 )
 
 func CreateOneConfig(config *ClientConfig) error {

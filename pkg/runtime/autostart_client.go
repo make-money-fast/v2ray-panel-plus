@@ -1,9 +1,9 @@
 package runtime
 
 import (
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
 	"log"
-	"v2ray-panel-plus/pkg/conf"
-	"v2ray-panel-plus/pkg/runtime/client"
 )
 
 // AutoStart 自动开启，用于服务中断后的重启

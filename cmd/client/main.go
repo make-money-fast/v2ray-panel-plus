@@ -2,14 +2,14 @@ package main
 
 import (
 	"github.com/getlantern/systray"
+	v2ray_panel_plus "github.com/make-money-fast/v2ray-panel-plus"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/menu"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/pac"
+	client2 "github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/system"
 	"time"
-	v2ray_panel_plus "v2ray-panel-plus"
-	"v2ray-panel-plus/pkg/api/client"
-	"v2ray-panel-plus/pkg/conf"
-	"v2ray-panel-plus/pkg/menu"
-	"v2ray-panel-plus/pkg/pac"
-	client2 "v2ray-panel-plus/pkg/runtime/client"
-	"v2ray-panel-plus/pkg/system"
 )
 
 func init() {

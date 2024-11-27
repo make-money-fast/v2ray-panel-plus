@@ -2,9 +2,9 @@ package menu
 
 import (
 	"github.com/getlantern/systray"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
 	"github.com/pkg/browser"
 	"os"
-	"v2ray-panel-plus/pkg/runtime/client"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"v2ray-panel-plus/pkg/helpers"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
 )
 
 //go:embed localconfig.json

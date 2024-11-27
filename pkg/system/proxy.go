@@ -1,9 +1,9 @@
 package system
 
 import (
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
 	"github.com/pkg/errors"
 	"sync"
-	"v2ray-panel-plus/pkg/conf"
 )
 
 var (
