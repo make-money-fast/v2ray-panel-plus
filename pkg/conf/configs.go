@@ -21,6 +21,15 @@ func CreateOneConfig(config *ClientConfig) error {
 	return saveConfigList(list)
 }
 
+func CreateOneServerConfig(config *ServerConfig) error {
+	list, err := GetServerConfigList()
+	if err != nil {
+		return err
+	}
+	list = append(list, config)
+	return saveServerConfigList(list)
+}
+
 func UpdateOneConfig(config *ClientConfig) error {
 	list, err := getConfigList()
 	if err != nil {
@@ -34,8 +43,25 @@ func UpdateOneConfig(config *ClientConfig) error {
 	return saveConfigList(list)
 }
 
+func UpdateOneServerConfig(config *ServerConfig) error {
+	list, err := GetServerConfigList()
+	if err != nil {
+		return err
+	}
+	lo.ForEach(list, func(item *ServerConfig, index int) {
+		if item.UUID == config.UUID {
+			list[index] = config
+		}
+	})
+	return saveServerConfigList(list)
+}
+
 func GetConfigList() ([]*ClientConfig, error) {
 	return getConfigList()
+}
+
+func GetServerConfigList() ([]*ServerConfig, error) {
+	return getServerConfig()
 }
 
 func GetConfigByUUID(uuid string) (*ClientConfig, error) {
@@ -65,6 +91,20 @@ func DeleteOneConfig(uuid string) error {
 	return saveConfigList(newConf)
 }
 
+func DeleteOneServerConfig(uuid string) error {
+	list, err := GetServerConfigList()
+	if err != nil {
+		return err
+	}
+	newConf := lo.Filter(list, func(item *ServerConfig, index int) bool {
+		if item.UUID == uuid {
+			return false
+		}
+		return true
+	})
+	return saveServerConfigList(newConf)
+}
+
 func getConfigList() ([]*ClientConfig, error) {
 	var (
 		confs     []*ClientConfig
@@ -83,9 +123,35 @@ func getConfigList() ([]*ClientConfig, error) {
 	return confs, nil
 }
 
+func getServerConfig() ([]*ServerConfig, error) {
+	var (
+		confs     []*ServerConfig
+		configMap = make(map[string]*ServerConfig)
+	)
+	err := helpers.ReadJSONFile(defaultConfigPath(), &configMap)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range configMap {
+		confs = append(confs, item)
+	}
+	sort.Slice(confs, func(i, j int) bool {
+		return confs[i].Ts < confs[j].Ts
+	})
+	return confs, nil
+}
+
 func saveConfigList(list []*ClientConfig) error {
 	var configMap = make(map[string]*ClientConfig)
 	lo.ForEach(list, func(item *ClientConfig, index int) {
+		configMap[item.UUID] = item
+	})
+	return helpers.WriteJSONFile(defaultConfigPath(), configMap)
+}
+
+func saveServerConfigList(list []*ServerConfig) error {
+	var configMap = make(map[string]*ServerConfig)
+	lo.ForEach(list, func(item *ServerConfig, index int) {
 		configMap[item.UUID] = item
 	})
 	return helpers.WriteJSONFile(defaultConfigPath(), configMap)

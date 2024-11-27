@@ -1,0 +1,26 @@
+{
+  "config": {
+    "port": 30001,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "2fe38682-f7e8-4559-ad6f-54b94dc05a11",
+          "level": 1,
+          "alterId": 0
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "ws"
+    },
+    "sniffing": {
+      "enabled": true,
+      "destOverride": [
+        "http",
+        "tls"
+      ]
+    }
+  },
+  "port": "30001"
+}

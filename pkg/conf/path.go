@@ -1,6 +1,7 @@
 package conf
 
 import (
+	_ "embed"
 	"fmt"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
 	"github.com/pkg/errors"
@@ -10,17 +11,50 @@ import (
 	"path/filepath"
 )
 
+// 客户端名称
+var (
+	// ConfigJsonName 列表
+	ConfigJsonName = "config.json"
+
+	// RuntimeConfigJsonName 运行时
+	RuntimeConfigJsonName = "config.runtime.json"
+
+	// ConfigLocalName 本地配置
+	ConfigLocalName = "config.local.json"
+
+	// ServerConfigTemplate 服务端运行模板文件
+	ServerConfigTemplate = "config.template.json"
+)
+
+// AsServer 服务端名称
+func AsServer() {
+	ConfigJsonName = "config.server.json"
+	RuntimeConfigJsonName = "config.server.json"
+}
+
+func GetDefaultConfigDirectory() string {
+	return defaultConfigDirectory()
+}
+
+func GetRuntimeConfigPath() string {
+	return getRuntimeConfigPath()
+}
+
 func defaultConfigDirectory() string {
 	home := os.Getenv("HOME")
 	return filepath.Join(home, ".v2raypanel")
 }
 
 func defaultConfigPath() string {
-	return filepath.Join(defaultConfigDirectory(), "config.json")
+	return filepath.Join(defaultConfigDirectory(), ConfigJsonName)
+}
+
+func defaultServerTemplate() string {
+	return filepath.Join(defaultConfigDirectory(), ServerConfigTemplate)
 }
 
 func getRuntimeConfigPath() string {
-	return filepath.Join(defaultConfigDirectory(), "config.runtime.json")
+	return filepath.Join(defaultConfigDirectory(), RuntimeConfigJsonName)
 }
 
 func InitDefaultConfigFile() {
@@ -29,6 +63,22 @@ func InitDefaultConfigFile() {
 		os.Exit(0)
 	}
 	readConfigsInit()
+}
+
+var (
+	//go:embed default_server_config.json
+	templateJson string
+)
+
+func InitTemplateFile() {
+	tplPath := defaultServerTemplate()
+	if err := checkFile(tplPath, func() error {
+		return ioutil.WriteFile(tplPath, []byte(templateJson), 0755)
+	}); err != nil {
+		log.Println("初始化配置文件失败", err)
+		os.Exit(1)
+		return
+	}
 }
 
 // ActiveRuntimeConfigFile 写入uuid指定的配置文件.
@@ -47,8 +97,18 @@ func ActiveRuntimeConfigFile(uuid string) (string, error) {
 	return runPath, helpers.WriteJSONFile(runPath, config.Config, true)
 }
 
+// ActiveServerRuntimeConfig 写入uuid指定的配置文件.
+func ActiveServerRuntimeConfig() (string, error) {
+	conf, err := MergeServerConfig()
+	if err != nil {
+		return "", err
+	}
+	runPath := getRuntimeConfigPath()
+	return runPath, helpers.WriteJSONFile(runPath, conf, true)
+}
+
 func getLocalConfigPath() string {
-	return filepath.Join(defaultConfigDirectory(), "config.local.json")
+	return filepath.Join(defaultConfigDirectory(), ConfigLocalName)
 }
 
 func readConfigsInit() {
