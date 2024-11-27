@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/clearcodecn/vmess"
 	"github.com/google/uuid"
 	"github.com/liggitt/tabwriter"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
@@ -114,8 +115,7 @@ func init() {
 			Name:  "link",
 			Usage: "vmess地址",
 			Action: func(ctx context.Context, command *cli.Command) error {
-				// return actionLink(ctx, command)
-				return nil
+				return actionLink(ctx, command)
 			},
 		},
 	}
@@ -169,7 +169,7 @@ func actionAdd(ctx context.Context, command *cli.Command) error {
 		serverConfig.UUID = uuid.New().String()
 	}
 	if serverConfig.Protocol == "" {
-		serverConfig.Protocol = serverConfig.Config.Protocol
+		serverConfig.Protocol = serverConfig.Config.StreamSettings.Network
 	}
 	if serverConfig.Id == "" {
 		if len(serverConfig.Config.Settings.Clients) == 0 {
@@ -274,4 +274,49 @@ func rawRequest(args []string) {
 	}
 	fmt.Println(string(data))
 	return
+}
+
+func getIP() string {
+	var data = make(map[string]string)
+	rsp, err := http.Get("http://ipinfo.io")
+	if err != nil {
+		return ""
+	}
+	jsondata, _ := ioutil.ReadAll(rsp.Body)
+	json.Unmarshal(jsondata, &daemon)
+	return data["ip"]
+}
+
+func actionLink(ctx context.Context, command *cli.Command) error {
+	list, err := conf.GetServerConfigList()
+	if err != nil {
+		return err
+	}
+	ip := getIP()
+
+	lo.ForEach(list, func(item *conf.ServerConfig, index int) {
+		uuid := command.String("uuid")
+		if uuid != "" && item.UUID != uuid {
+			return
+		}
+
+		link := vmess.Link{
+			Version: 0,
+			Name:    fmt.Sprintf("%s_%s", ip, item.Port),
+			Address: ip,
+			Port:    item.Port,
+			Id:      item.Id,
+			Aid:     "0",
+			Network: item.Protocol,
+			Type:    "",
+		}
+
+		if item.Config.StreamSettings.KCPConfig != nil {
+			link.Type = item.Config.StreamSettings.KCPConfig.HeaderConfig["type"]
+		}
+
+		fmt.Sprintf("%s: %s\n\n", link.Name, link.ToVmessLink())
+	})
+
+	return nil
 }

@@ -29,7 +29,7 @@ var (
 // AsServer 服务端名称
 func AsServer() {
 	ConfigJsonName = "config.server.json"
-	RuntimeConfigJsonName = "config.server.json"
+	RuntimeConfigJsonName = "config.runtime.json"
 }
 
 func GetDefaultConfigDirectory() string {
@@ -104,6 +104,7 @@ func ActiveServerRuntimeConfig() (string, error) {
 		return "", err
 	}
 	runPath := getRuntimeConfigPath()
+	fmt.Println(runPath)
 	return runPath, helpers.WriteJSONFile(runPath, conf, true)
 }
 
