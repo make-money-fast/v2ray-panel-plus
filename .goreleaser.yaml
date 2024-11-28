@@ -1,0 +1,38 @@
+# .goreleaser.yaml
+builds:
+  # You can have multiple builds defined as a yaml list
+  - #
+    id: "server"
+
+    # Path to main.go file or main package.
+    # Notice: when used with `gomod.proxy`, this must be a package.
+    #
+    # Default: `.`.
+    main: './cmd/server'
+
+    # Binary name.
+    # Can be a path (e.g. `bin/app`) to wrap the binary in a directory.
+    #
+    # Default: Project directory name.
+    binary: bin/v2ray
+
+    # GOOS list to build for.
+    # For more info refer to: https://go.dev/doc/install/source#environment
+    #
+    # Default: [ 'darwin', 'linux', 'windows' ].
+    goos:
+      - linux
+
+    # GOARCH to build for.
+    # For more info refer to: https://go.dev/doc/install/source#environment
+    #
+    # Default: [ '386', 'amd64', 'arm64' ].
+    goarch:
+      - amd64
+
+    # Set a specific go binary to use when building.
+    # It is safe to ignore this option in most cases.
+    #
+    # Default: "go".
+    # Templates: allowed.
+    gobinary: "go"
