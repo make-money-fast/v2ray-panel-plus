@@ -80,4 +80,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            "${{ env.APP_NAME }}_${{ matrix.architecture }}.zip"
+            ${{ env.APP_NAME }}_${{ matrix.architecture }}.zip
