@@ -55,6 +55,8 @@ jobs:
 
       - name: Archive the application
         run: |
+          APP_NAME="V2rayPanel"
+          APP_DIR="${APP_NAME}.app"
           zip -r "${APP_NAME}_${{ matrix.architecture }}.zip" "${APP_DIR}"
 
       - name: Upload the application
