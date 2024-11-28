@@ -28,7 +28,7 @@ jobs:
 
       - name: Build the application
         run: |
-          GOARCH=${{ matrix.architecture }} go build -o bin/v2ray_${{ matrix.architecture }} cmd/client/main.go
+          GOOS=darwin GOARCH=${{ matrix.architecture }} go build -o bin/v2ray_${{ matrix.architecture }} cmd/client/main.go
 
       - name: Create macOS app bundle
         run: |

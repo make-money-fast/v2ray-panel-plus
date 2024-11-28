@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/getlantern/systray"
 	v2ray_panel_plus "github.com/make-money-fast/v2ray-panel-plus"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/client"
@@ -12,14 +14,26 @@ import (
 	"time"
 )
 
+var (
+	test bool
+)
+
 func init() {
+	flag.BoolVar(&test, "t", false, "testing mode")
+}
+
+func main() {
+	flag.Parse()
+
+	if test {
+		fmt.Println("testing ok")
+		return
+	}
+
 	conf.InitDefaultConfigFile()
 	conf.InitLocalConfig()
 	pac.InitGfw(conf.GetGfwPath())
 	conf.InitRunningStatus()
-}
-
-func main() {
 	run()
 }
 

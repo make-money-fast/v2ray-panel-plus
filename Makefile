@@ -1,10 +1,8 @@
-.PHONY: build-macos
-build-macos:
-	@rm -rf bin/mac
-	@mkdir -p bin/mac
-	@GOOS=darwin GOARCH=arm64 go build -o bin/mac/v2raypanel cmd/client/main.go
+$(shell mkdir -p bin)
 
-server:
-	@rm -rf bin/linux/
-	@mkdir -p bin/linux
-	@GOOS=linux GOARCH=amd64 go build -o bin/linux/v2ray cmd/server/main.go
+.PHONY: build
+build:
+	@go build -o bin/v2raypanel cmd/client/main.go
+
+build-server:
+	@go build -o bin/v2ray cmd/server/main.go
