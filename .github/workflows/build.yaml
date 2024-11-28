@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        architecture: [amd64, arm64]  # amd64 for Intel, arm64 for M2
+        architecture: [arm64]  # amd64 for Intel, arm64 for M2
 
     steps:
       - name: Checkout code
@@ -33,7 +33,7 @@ jobs:
           VERSION="1.0.0"
           
           mkdir -p "${APP_DIR}/Contents/MacOS"
-          cp "myapp_${{ matrix.architecture }}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
+          cp "bin/v2ray_${{ matrix.architecture }}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
           
           # 创建 Info.plist
           cat > "${APP_DIR}/Contents/Info.plist" <<EOL
