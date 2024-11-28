@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/clearcodecn/vmess"
 	"github.com/google/uuid"
 	"github.com/liggitt/tabwriter"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
@@ -135,13 +134,13 @@ func actionList(ctx context.Context, command *cli.Command) error {
 
 	w := tabwriter.NewWriter(os.Stdout, 8, 4, 2, '\t', tabwriter.TabIndent)
 
-	header := fmt.Sprintf("uuid\talias\tprotocol\tport\r\n")
+	header := fmt.Sprintf("uuid\talias\tprotocol\tport\n")
 	w.Write([]byte(header))
 
 	lo.ForEach(serverConfigList, func(item *conf.ServerConfig, index int) {
 		var s []string
 		s = append(s, item.UUID, item.Alias, item.Protocol, item.Port)
-		w.Write([]byte(strings.Join(s, "\t")))
+		w.Write([]byte(strings.Join(s, "\t") + "\n"))
 	})
 
 	return w.Flush()
@@ -180,7 +179,15 @@ func actionAdd(ctx context.Context, command *cli.Command) error {
 	if serverConfig.Alias == "" {
 		serverConfig.Alias = fmt.Sprintf("%s:%s", serverConfig.Protocol, serverConfig.Port)
 	}
-	return conf.CreateOneServerConfig(&serverConfig)
+	if err := conf.CreateOneServerConfig(&serverConfig); err != nil {
+		return err
+	}
+	fmt.Println("server add new configure: uuid=", serverConfig.UUID)
+	fmt.Println("protocol: ", serverConfig.Protocol)
+	fmt.Println("port: ", serverConfig.Port)
+	fmt.Println("id: ", serverConfig.Id)
+	fmt.Println("vmess Link: ", serverConfig.BuildVmess())
+	return nil
 }
 
 func actionStart(ctx context.Context, command *cli.Command) error {
@@ -193,6 +200,7 @@ func actionStart(ctx context.Context, command *cli.Command) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("server start ok")
 		return nil
 	}
 	rawRequest(os.Args[1:])
@@ -202,6 +210,7 @@ func actionStart(ctx context.Context, command *cli.Command) error {
 func actionStop(ctx context.Context, command *cli.Command) error {
 	if daemon {
 		client.Stop()
+		fmt.Println("server stop ok")
 		return nil
 	}
 	rawRequest(os.Args[1:])
@@ -214,14 +223,23 @@ func actionReload(ctx context.Context, command *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		return client.Reload(path)
+		if err := client.Reload(path); err != nil {
+			return err
+		}
+		fmt.Println("server reload ok")
+		return nil
 	}
 	rawRequest(os.Args[1:])
 	return nil
 }
 
 func actionDel(ctx context.Context, command *cli.Command) error {
-	return conf.DeleteOneServerConfig(command.String("uuid"))
+	id := command.String("uuid")
+	if err := conf.DeleteOneServerConfig(id); err != nil {
+		return err
+	}
+	fmt.Println("deleted: ", id)
+	return nil
 }
 
 type JsonRequest struct {
@@ -273,18 +291,10 @@ func rawRequest(args []string) {
 		return
 	}
 	fmt.Println(string(data))
-	return
-}
-
-func getIP() string {
-	var data = make(map[string]string)
-	rsp, err := http.Get("http://ipinfo.io")
-	if err != nil {
-		return ""
+	if string(data) == "ok" {
+		fmt.Println("handle success")
 	}
-	jsondata, _ := ioutil.ReadAll(rsp.Body)
-	json.Unmarshal(jsondata, &daemon)
-	return data["ip"]
+	return
 }
 
 func actionLink(ctx context.Context, command *cli.Command) error {
@@ -292,30 +302,12 @@ func actionLink(ctx context.Context, command *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	ip := getIP()
-
 	lo.ForEach(list, func(item *conf.ServerConfig, index int) {
 		uuid := command.String("uuid")
 		if uuid != "" && item.UUID != uuid {
 			return
 		}
-
-		link := vmess.Link{
-			Version: 0,
-			Name:    fmt.Sprintf("%s_%s", ip, item.Port),
-			Address: ip,
-			Port:    item.Port,
-			Id:      item.Id,
-			Aid:     "0",
-			Network: item.Protocol,
-			Type:    "",
-		}
-
-		if item.Config.StreamSettings.KCPConfig != nil {
-			link.Type = item.Config.StreamSettings.KCPConfig.HeaderConfig["type"]
-		}
-
-		fmt.Sprintf("%s: %s\n\n", link.Name, link.ToVmessLink())
+		fmt.Sprintf("%s: %s\n\n", item.Alias, item.BuildVmess())
 	})
 
 	return nil

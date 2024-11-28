@@ -1,8 +1,13 @@
 package conf
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/clearcodecn/vmess"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
 	"github.com/samber/lo"
+	"io/ioutil"
+	"net/http"
 	"path/filepath"
 )
 
@@ -73,6 +78,38 @@ type ServerConfig struct {
 	Id       string         `json:"id"`       // 用户id
 	Status   int            `json:"status"`   // 状态
 	Ts       int64          `json:"ts"`       // 创建的时间戳
+}
+
+func (c *ServerConfig) BuildVmess() string {
+	ip := GetIP()
+
+	link := vmess.Link{
+		Version: 0,
+		Name:    fmt.Sprintf("%s_%s", ip, c.Port),
+		Address: ip,
+		Port:    c.Port,
+		Id:      c.Id,
+		Aid:     "0",
+		Network: c.Protocol,
+		Type:    "",
+	}
+
+	if c.Config.StreamSettings.KCPConfig != nil {
+		link.Type = c.Config.StreamSettings.KCPConfig.HeaderConfig["type"]
+	}
+
+	return link.ToVmessLink()
+}
+
+func GetIP() string {
+	var data = make(map[string]string)
+	rsp, err := http.Get("http://ipinfo.io")
+	if err != nil {
+		return ""
+	}
+	jsondata, _ := ioutil.ReadAll(rsp.Body)
+	json.Unmarshal(jsondata, &data)
+	return data["ip"]
 }
 
 func MergeServerConfig() (*ServerV2rayConfig, error) {
