@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/skip2/go-qrcode"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -344,11 +345,14 @@ func importVmess(ctx *gin.Context) {
 
 	clientConfig.Outbounds[0].Settings.Vnext[0].Users[0].Id = link.Id
 	clientConfig.Outbounds[0].Settings.Vnext[0].Users[0].Id = link.Id
+	clientConfig.Outbounds[0].Settings.Vnext[0].Address = link.Host
+	clientConfig.Outbounds[0].Settings.Vnext[0].Port = str2Int(link.Port)
 	clientConfig.Outbounds[0].StreamSettings.Network = link.Network
 	clientConfig.Outbounds[0].StreamSettings.Security = link.Tls
 
 	switch link.Network {
 	case "ws":
+		clientConfig.Outbounds[0].StreamSettings.WSConfig = &conf.WebSocketConfig{}
 		if link.Path != "" && link.Host != "" {
 			clientConfig.Outbounds[0].StreamSettings.WSConfig = &conf.WebSocketConfig{
 				Path:  link.Path,
@@ -359,6 +363,7 @@ func importVmess(ctx *gin.Context) {
 			}
 		}
 	case "kcp":
+		clientConfig.Outbounds[0].StreamSettings.KCPConfig = &conf.KCPConfig{}
 		var up uint32 = 5
 		var down uint32 = 100
 		header := map[string]string{
@@ -411,6 +416,27 @@ func configJson(ctx *gin.Context) {
 		sendError(ctx, errors.Wrap(err, "查找配置失败"))
 		return
 	}
+
+	localConfig, err := conf.GetLocalConfig()
+	if err != nil {
+		sendError(ctx, errors.Wrap(err, "查找配置失败"))
+		return
+	}
+	inBounds := config.Config.Inbounds
+	for idx, inbound := range inBounds {
+		if inbound.Protocol == "socks" {
+			inbound.Port = localConfig.SocksPort
+			inbound.Listen = localConfig.SocksAddress
+		}
+		if inbound.Protocol == "http" {
+			inbound.Port = localConfig.HttpPort
+			inbound.Listen = localConfig.HttpAddress
+		}
+		inBounds[idx] = inbound
+	}
+	config.Config.Inbounds = inBounds
+	config.Config.Log.Access = filepath.Join(conf.GetDefaultConfigDirectory(), "access.log")
+	config.Config.Log.Error = filepath.Join(conf.GetDefaultConfigDirectory(), "error.log")
 
 	data, err := json.MarshalIndent(config.Config, "", "\t")
 	if err != nil {
