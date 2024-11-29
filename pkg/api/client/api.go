@@ -89,7 +89,6 @@ func editConfig(ctx *gin.Context) {
 	config.Id = req.Id
 	config.Protocol = req.Network
 	config.Alias = req.Alias
-	config.Vmess = config.Config.GetVmess(config.Alias)
 
 	config.Config.Outbounds[0].Settings.Vnext[0].Port = helpers.Str2Int(config.Port)
 	config.Config.Outbounds[0].Settings.Vnext[0].Address = config.Host
@@ -118,7 +117,7 @@ func editConfig(ctx *gin.Context) {
 		json.Unmarshal(headerRaw, &mp)
 		config.Config.Outbounds[0].StreamSettings.KCPConfig.HeaderConfig = mp
 	}
-
+	config.Vmess = config.Config.GetVmess(config.Alias)
 	if err := conf.UpdateOneConfig(config); err != nil {
 		sendError(ctx, errors.Wrap(err, "更新配置失败"))
 		return
