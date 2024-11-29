@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>V2ray Panel Server Config</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/element.min.css">
+    <link rel="shortcut icon" href="/static/favicon.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container mx-auto w-50 py-2 mt-4">
+    <el-card>
+        <el-button split-button type="primary" @click="handleAddClick" class="mx-2">
+            新增配置
+        </el-button>
+        <el-button split-button type="primary" @click="handleReloadClick" class="mx-2">
+            重新加载配置
+        </el-button>
+        <el-button split-button type="primary" @click="handleRuntimeConfig" class="mx-2">
+            运行时配置
+        </el-button>
+    </el-card>
+    <div class="d-flex flex-column mt-2">
+        <el-card class="w-100 mt-1" v-for="item in configList" :key="item.uuid">
+            <div class="d-flex flex-row justify-content-between align-content-center">
+                <div class="left">
+                    <p>{{ item.alias }}</p>
+                    <el-tag type="primary">{{ item.host }}:{{ item.port }}</el-tag>
+                    <el-tag type="primary">{{ item.protocol }}</el-tag>
+                    <el-tag type="danger" v-if="item.status === 0">未启动</el-tag>
+                    <el-tag type="success" v-if="item.status === 1">运行中</el-tag>
+                </div>
+                <div class="d-flex" style="height: 28px;">
+                    <el-link class="px-2" type="primary" @click="handleEditClick(item)">
+                        编辑
+                    </el-link>
+                    <el-link class="px-2" type="primary" slot="reference" @click="handleCopy(item)">
+                        复制
+                    </el-link>
+                    <el-link class="px-2" type="primary" slot="reference" @click="handleShare(item)">
+                        分享
+                    </el-link>
+                    <el-link class="px-2" type="danger" slot="reference" @click="handleDelete(item)">
+                        删除
+                    </el-link>
+                </div>
+            </div>
+        </el-card>
+    </div>
+
+    <!-- 配置编辑 -->
+    <el-drawer
+            title="编辑配置"
+            :visible.sync="configDrawer"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-form :model="editConfig" :rules="rules" ref="editConfig" label-width="80px">
+            <el-form-item label="别名" prop="alias" label-width="120px">
+                <el-input v-model="editConfig.alias" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="端口" label-width="120px" prop="port">
+                <el-input v-model="editConfig.port" class="w-75"></el-input>
+            </el-form-item>
+
+            <el-form-item label="id" label-width="120px" prop="id">
+                <el-input v-model="editConfig.id" class="w-75"></el-input>
+            </el-form-item>
+            <el-form-item label="协议" label-width="120px" prop="protocol">
+                <el-select v-model="editConfig.protocol" class="w-75">
+                    <el-option v-for="item in protocolList" :key="item" :value="item" :label="item"></el-option>
+                </el-select>
+            </el-form-item>
+            <div v-if="editConfig.protocol === 'kcp'">
+                <el-divider content-position="center" class="w-75 mx-auto">
+                    KCP配置
+                </el-divider>
+                <el-form-item label="伪装类型" label-width="120px" prop="type">
+                    <el-select v-model="editConfig.type" class="w-75">
+                        <el-option v-for="item in headers" :key="item" :value="item" :label="item"></el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <el-form-item>
+                <el-button type="primary" @click="onConfigEdit('editConfig')">更新</el-button>
+                <el-button type="danger" @click="onConfigCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-drawer>
+
+    <el-drawer
+            title="分享"
+            :visible.sync="vmessShare"
+            size="540px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <el-card>
+            <div class="border-2 bg-secondary-subtle text-white p-2 rounded-2">
+                <code>{{ vmessShareItem.link }}</code>
+            </div>
+            <div class="mt-2 mx-auto text-center">
+                <img :src="vmessShareItem.qrCode" alt="">
+            </div>
+        </el-card>
+    </el-drawer>
+
+    <el-drawer
+            title="运行配置"
+            :visible.sync="runtimeConfig"
+            size="720px"
+            direction="rtl"
+            class="mx-auto"
+    >
+        <div class="d-flex align-content-center flex-column">
+            <div id="editor" style="min-height: 640px;">{{ runtimeString }}</div>
+            <div class="d-flex align-content-center justify-content-center mt-4">
+                <el-button type="danger" @click="onRuntimeConfigCancel">取消</el-button>
+            </div>
+        </div>
+    </el-drawer>
+
+</div>
+<script src="/static/js/axios.min.js"></script>
+<script src="/static/js/vue.min.js"></script>
+<script src="/static/js/clipboard.min.js"></script>
+<script src="/static/js/element-ui.js"></script>
+<script src="/static/ace/ace.js"></script>
+<script src="/static/js/server.js"></script>
+</body>
+</html>

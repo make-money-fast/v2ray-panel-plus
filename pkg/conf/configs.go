@@ -159,6 +159,10 @@ func saveServerConfigList(list []*ServerConfig) error {
 	return helpers.WriteJSONFile(defaultConfigPath(), configMap)
 }
 
+func SaveServerConfigList(list []*ServerConfig) error {
+	return saveServerConfigList(list)
+}
+
 func SaveConfigList(list []*ClientConfig) error {
 	return saveConfigList(list)
 }

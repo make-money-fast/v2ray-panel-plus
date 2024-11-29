@@ -104,7 +104,6 @@ func ActiveServerRuntimeConfig() (string, error) {
 		return "", err
 	}
 	runPath := getRuntimeConfigPath()
-	fmt.Println(runPath)
 	return runPath, helpers.WriteJSONFile(runPath, conf, true)
 }
 

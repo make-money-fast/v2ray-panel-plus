@@ -48,8 +48,22 @@ func StartHttpServer() {
 		api.POST("/setProxy", setProxy)
 	}
 
+	apiServer := g.Group("/api/server")
+	{
+		apiServer.POST("/add", addServerConfig)
+		apiServer.POST("/uuid", getUUID)
+		apiServer.POST("/reload", reloadServer)
+		apiServer.POST("/edit", editServerConfig)
+		apiServer.POST("/del", deleteServerConfig)
+		apiServer.POST("/list", listServerConfig)
+		apiServer.POST("/runtime", runtimeServerConfig)
+	}
+
 	g.GET("/", func(ctx *gin.Context) {
 		ctx.Redirect(302, "/static/client")
+	})
+	g.GET("/server", func(ctx *gin.Context) {
+		ctx.Redirect(302, "/static/server")
 	})
 	g.GET("/proxy.pac", Pacjs)
 	g.GET("/qrcode", qrCode)
@@ -58,6 +72,7 @@ func StartHttpServer() {
 	// html
 	fmt.Println("Servering at on ", ListenAddress)
 	menu.UIAddress = ListenAddress
+	menu.ServerUIAddress = ListenAddress + "/server"
 	g.Run(fmt.Sprintf(":%s", port))
 }
 

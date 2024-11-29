@@ -12,20 +12,26 @@ import (
 )
 
 type ServerInbound struct {
-	Port     int    `json:"port"`
-	Protocol string `json:"protocol"`
-	Settings struct {
-		Clients []struct {
-			Id      string `json:"id"`
-			Level   int    `json:"level"`
-			AlterId int    `json:"alterId"`
-		} `json:"clients"`
-	} `json:"settings"`
+	Port           int            `json:"port"`
+	Protocol       string         `json:"protocol"`
+	Settings       Settings       `json:"settings"`
 	StreamSettings *StreamSetting `json:"streamSettings,omitempty"`
-	Sniffing       struct {
-		Enabled      bool     `json:"enabled"`
-		DestOverride []string `json:"destOverride"`
-	} `json:"sniffing"`
+	Sniffing       `json:"sniffing"`
+}
+
+type Client struct {
+	Id      string `json:"id"`
+	Level   int    `json:"level"`
+	AlterId int    `json:"alterId"`
+}
+
+type Settings struct {
+	Clients []Client `json:"clients"`
+}
+
+type Sniffing struct {
+	Enabled      bool     `json:"enabled"`
+	DestOverride []string `json:"destOverride"`
 }
 
 type ServerOutbound struct {
@@ -76,8 +82,8 @@ type ServerConfig struct {
 	Port     string         `json:"port"`     // 端口
 	Protocol string         `json:"protocol"` // 协议.
 	Id       string         `json:"id"`       // 用户id
-	Status   int            `json:"status"`   // 状态
 	Ts       int64          `json:"ts"`       // 创建的时间戳
+	Type     string         `json:"type"`
 }
 
 func (c *ServerConfig) BuildVmess() string {

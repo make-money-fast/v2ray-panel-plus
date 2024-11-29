@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/liggitt/tabwriter"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/server"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
 	"github.com/pkg/errors"
@@ -17,7 +18,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 )
 
 var daemon bool
@@ -132,18 +132,15 @@ func actionList(ctx context.Context, command *cli.Command) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 8, 4, 2, '\t', tabwriter.TabIndent)
+	t := table.NewWriter()
+	t.SetTitle("Server List")
 
-	header := fmt.Sprintf("uuid\talias\tprotocol\tport\n")
-	w.Write([]byte(header))
-
+	t.AppendHeader(table.Row{"UUID", "Alias", "Network", "Port"})
 	lo.ForEach(serverConfigList, func(item *conf.ServerConfig, index int) {
-		var s []string
-		s = append(s, item.UUID, item.Alias, item.Protocol, item.Port)
-		w.Write([]byte(strings.Join(s, "\t") + "\n"))
+		t.AppendRow(table.Row{item.UUID, item.Alias, item.Protocol, item.Port})
 	})
-
-	return w.Flush()
+	fmt.Println(t.Render())
+	return nil
 }
 
 func actionAdd(ctx context.Context, command *cli.Command) error {
@@ -178,6 +175,9 @@ func actionAdd(ctx context.Context, command *cli.Command) error {
 	}
 	if serverConfig.Alias == "" {
 		serverConfig.Alias = fmt.Sprintf("%s:%s", serverConfig.Protocol, serverConfig.Port)
+	}
+	if serverConfig.Type == "" && serverConfig.Config.StreamSettings != nil && serverConfig.Config.StreamSettings.KCPConfig != nil && serverConfig.Config.StreamSettings.KCPConfig.HeaderConfig != nil {
+		serverConfig.Type = serverConfig.Config.StreamSettings.KCPConfig.HeaderConfig["type"]
 	}
 	if err := conf.CreateOneServerConfig(&serverConfig); err != nil {
 		return err
@@ -247,6 +247,9 @@ type JsonRequest struct {
 }
 
 func startDaemon() {
+	go func() {
+		server.RunServer()
+	}()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -307,7 +310,7 @@ func actionLink(ctx context.Context, command *cli.Command) error {
 		if uuid != "" && item.UUID != uuid {
 			return
 		}
-		fmt.Sprintf("%s: %s\n\n", item.Alias, item.BuildVmess())
+		fmt.Printf("%s: %s\n\n", item.Alias, item.BuildVmess())
 	})
 
 	return nil

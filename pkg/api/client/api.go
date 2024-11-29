@@ -19,21 +19,21 @@ import (
 	"time"
 )
 
-type Response struct {
+type Response[T any] struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
-	Data any    `json:"data"`
+	Data T      `json:"data"`
 }
 
 func sendError(ctx *gin.Context, err error) {
-	ctx.JSON(200, &Response{
+	ctx.JSON(200, &Response[any]{
 		Code: -1,
 		Msg:  err.Error(),
 	})
 }
 
 func sendSuccess(ctx *gin.Context, data any) {
-	ctx.JSON(200, &Response{
+	ctx.JSON(200, &Response[any]{
 		Code: 0,
 		Data: data,
 	})
@@ -412,7 +412,7 @@ func configJson(ctx *gin.Context) {
 		return
 	}
 
-	data, err := json.MarshalIndent(config.Config, "", "&nbsp;&nbsp;&nbsp;&nbsp;")
+	data, err := json.MarshalIndent(config.Config, "", "\t")
 	if err != nil {
 		sendError(ctx, errors.Wrap(err, "序列号配置失败"))
 		return

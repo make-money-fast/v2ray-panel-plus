@@ -197,10 +197,17 @@ new Vue({
         async getConfigJson(item) {
             let rsp = await this.post('/api/configJSON', {uuid: item.uuid})
             if (rsp) {
-                this.configJsonDrawer = true;
-                rsp = rsp.replaceAll("\n", "<br />")
-                this.configJson = rsp;
+               this.configJsonDrawer = true;
+               this.configJson = rsp;
+                this.$nextTick(() => {
+                    var editor = ace.edit("editor");
+                    editor.setTheme("ace/theme/chrome");
+                    editor.session.setMode("ace/mode/json");
+                })
             }
+        },
+        async onConfigJsonCancel() {
+            this.configJsonDrawer = false;
         },
         async handleShare(item) {
             this.vmessShare = true;
@@ -322,6 +329,9 @@ new Vue({
         async getConfigList() {
             let rsp = await this.post("/api/list", {})
             this.configList = rsp ?? {};
+        },
+        async handlerServerRoute(item) {
+            window.location.href = '../server?host=' +'http://' + item.host + ":7677"
         },
         async autoTestTimeLine() {
             this.fullscreenLoading = true;

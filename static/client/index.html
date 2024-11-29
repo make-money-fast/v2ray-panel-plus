@@ -13,6 +13,9 @@
         body {
             font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
         }
+        .bg-active{
+            background: #c8f5e5 !important;
+        }
     </style>
 </head>
 <body>
@@ -45,7 +48,7 @@
         </el-button>
     </el-card>
     <div class="d-flex flex-column mt-2">
-        <el-card class="w-100 mt-1" v-for="item in configList" :key="item.uuid">
+        <el-card :class="item.status === 1 ? 'w-100 mt-1 bg-active': 'w-100 mt-1'"  v-for="item in configList" :key="item.uuid">
             <div class="d-flex flex-row justify-content-between align-content-center">
                 <div class="left">
                     <p>{{ item.alias }}</p>
@@ -75,6 +78,9 @@
                     </el-link>
                     <el-link class="px-2" type="danger" slot="reference" @click="handleDelete(item)">
                         删除
+                    </el-link>
+                    <el-link class="px-2" type="primary" slot="reference" @click="handlerServerRoute(item)">
+                        服务器配置
                     </el-link>
                 </div>
             </div>
@@ -235,16 +241,18 @@
     </el-drawer>
 
     <el-drawer
-            title="查看配置文件"
+            title="查看json"
             :visible.sync="configJsonDrawer"
-            size="630px"
+            size="720px"
             direction="rtl"
             class="mx-auto"
     >
-        <el-card>
-            <div class="border-2 bg-secondary-subtle text-dark p-2 rounded-2" v-html="configJson">
+        <div class="d-flex align-content-center flex-column">
+            <div id="editor" style="min-height: 640px;">{{ configJson }}</div>
+            <div class="d-flex align-content-center justify-content-center mt-4">
+                <el-button type="danger" @click="onConfigJsonCancel">取消</el-button>
             </div>
-        </el-card>
+        </div>
     </el-drawer>
 
     <el-drawer
@@ -275,6 +283,7 @@
 <script src="/static/js/vue.min.js"></script>
 <script src="/static/js/clipboard.min.js"></script>
 <script src="/static/js/element-ui.js"></script>
+<script src="/static/ace/ace.js"></script>
 <script src="/static/js/client.js"></script>
 </body>
 </html>
