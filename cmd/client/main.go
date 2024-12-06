@@ -16,10 +16,12 @@ import (
 
 var (
 	test bool
+	ui   bool
 )
 
 func init() {
 	flag.BoolVar(&test, "t", false, "testing mode")
+	flag.BoolVar(&ui, "b", true, "show ui")
 }
 
 func main() {
@@ -34,7 +36,50 @@ func main() {
 	conf.InitLocalConfig()
 	pac.InitGfw(conf.GetGfwPath())
 	conf.InitRunningStatus()
-	run()
+
+	if ui {
+		run()
+	} else {
+		runNoUI()
+	}
+}
+
+func runNoUI() {
+	time.Sleep(2 * time.Second)
+	// 检测上次运行配置.
+	status, err := conf.GetRunningStatus()
+	if err != nil {
+		return
+	}
+	if status.RunningUUID != "" {
+		path, err := conf.ActiveRuntimeConfigFile(status.RunningUUID)
+		if err != nil {
+			return
+		}
+		err = client2.Start(path)
+		if err != nil {
+			return
+		}
+	}
+	if status.ProxyStatus == system.Off {
+		return
+	}
+	switch status.ProxyMode {
+	case system.ModeNone:
+		err = system.SetNone()
+	case system.ModePac:
+		for {
+			addr := client.GetPacAddress()
+			if addr == "" {
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			err = system.SetPac(addr)
+			break
+		}
+	case system.ModeGlobal:
+		err = system.SetGlobal()
+	}
 }
 
 func run() {
@@ -44,41 +89,7 @@ func run() {
 			menu.Init()
 		}()
 		go func() {
-			time.Sleep(2 * time.Second)
-			// 检测上次运行配置.
-			status, err := conf.GetRunningStatus()
-			if err != nil {
-				return
-			}
-			if status.RunningUUID != "" {
-				path, err := conf.ActiveRuntimeConfigFile(status.RunningUUID)
-				if err != nil {
-					return
-				}
-				err = client2.Start(path)
-				if err != nil {
-					return
-				}
-			}
-			if status.ProxyStatus == system.Off {
-				return
-			}
-			switch status.ProxyMode {
-			case system.ModeNone:
-				err = system.SetNone()
-			case system.ModePac:
-				for {
-					addr := client.GetPacAddress()
-					if addr == "" {
-						time.Sleep(1 * time.Second)
-						continue
-					}
-					err = system.SetPac(addr)
-					break
-				}
-			case system.ModeGlobal:
-				err = system.SetGlobal()
-			}
+			runNoUI()
 		}()
 		systray.SetTemplateIcon(ico, ico)
 		systray.SetTooltip("v2-client")
