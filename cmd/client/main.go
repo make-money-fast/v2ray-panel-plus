@@ -93,6 +93,6 @@ func run() {
 		}()
 		systray.SetTemplateIcon(ico, ico)
 		systray.SetTooltip("v2-client")
-		client.StartHttpServer()
+		client.StartHttpServer("", "")
 	}, nil)
 }

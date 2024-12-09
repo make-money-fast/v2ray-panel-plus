@@ -34,7 +34,7 @@ func main() {
 	pac.InitGfw(conf.GetGfwPath())
 	conf.InitRunningStatus()
 	runNoUI()
-	client.StartHttpServer()
+	client.StartHttpServer("linux", "linux")
 }
 
 func runNoUI() {

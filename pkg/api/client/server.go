@@ -14,7 +14,7 @@ import (
 
 var ListenAddress = ""
 
-func StartHttpServer() {
+func StartHttpServer(username string, password string) {
 	g := gin.Default()
 	port := getListenPort()
 
@@ -25,6 +25,11 @@ func StartHttpServer() {
 		g.Any("/static/*action", func(ctx *gin.Context) {
 			http.FileServer(http.FS(v2ray_panel_plus.StaticFS)).ServeHTTP(ctx.Writer, ctx.Request)
 		})
+	}
+	if username != "" && password != "" {
+		g.Use(gin.BasicAuth(gin.Accounts{
+			username: password,
+		}))
 	}
 
 	api := g.Group("/api")
