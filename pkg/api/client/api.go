@@ -9,7 +9,7 @@ import (
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/helpers"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/menu"
-	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/system"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/vo"
 	"github.com/pkg/errors"
@@ -163,7 +163,7 @@ func reload(ctx *gin.Context) {
 		return
 	}
 
-	if err := client.Start(path); err != nil {
+	if err := runtime.Start(path); err != nil {
 		sendError(ctx, errors.Wrap(err, "启动服务失败"))
 		return
 	}
@@ -247,7 +247,7 @@ func autoTest(ctx *gin.Context) {
 		return
 	}
 
-	if client.IsRunning() {
+	if runtime.IsRunning() {
 		state.IsRunning = true
 	} else {
 		sendSuccess(ctx, state)
@@ -296,7 +296,7 @@ func stop(ctx *gin.Context) {
 			item.Status = conf.StatusDown
 		}
 	})
-	client.Stop()
+	runtime.Stop()
 	if err := conf.SaveConfigList(configs); err != nil {
 		sendError(ctx, errors.Wrap(err, "写入配置失败"))
 		return

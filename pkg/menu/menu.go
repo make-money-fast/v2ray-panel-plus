@@ -4,7 +4,7 @@ package menu
 
 import (
 	"github.com/getlantern/systray"
-	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/pkg/browser"
 	"os"
 )
@@ -35,7 +35,7 @@ func Init() {
 }
 
 func shutdown() {
-	client.Stop()
+	runtime.Stop()
 	systray.Quit()
 	os.Exit(0)
 }

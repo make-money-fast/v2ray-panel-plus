@@ -9,7 +9,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/server"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
-	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/urfave/cli/v3"
@@ -40,6 +40,8 @@ var (
 )
 
 func init() {
+	fmt.Println(os.Getenv("https_proxy"))
+	fmt.Println(os.Getenv("HTTPS_PROXY"))
 	rootCmd.Commands = []*cli.Command{
 		{
 			Name:      "start",
@@ -124,6 +126,7 @@ func init() {
 	conf.AsServer()
 	conf.InitDefaultConfigFile()
 	conf.InitTemplateFile()
+	runtime.InitServer(runtime.V5)
 }
 
 func actionList(ctx context.Context, command *cli.Command) error {
@@ -196,7 +199,7 @@ func actionStart(ctx context.Context, command *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		err = client.Start(path)
+		err = runtime.Start(path)
 		if err != nil {
 			return err
 		}
@@ -209,7 +212,7 @@ func actionStart(ctx context.Context, command *cli.Command) error {
 
 func actionStop(ctx context.Context, command *cli.Command) error {
 	if daemon {
-		client.Stop()
+		runtime.Stop()
 		fmt.Println("server stop ok")
 		return nil
 	}
@@ -223,7 +226,7 @@ func actionReload(ctx context.Context, command *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		if err := client.Reload(path); err != nil {
+		if err := runtime.Reload(path); err != nil {
 			return err
 		}
 		fmt.Println("server reload ok")

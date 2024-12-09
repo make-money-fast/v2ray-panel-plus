@@ -1,4 +1,4 @@
-package client
+package v4
 
 import (
 	_ "embed"
@@ -25,7 +25,7 @@ func closeStopChan() {
 	}
 }
 
-func Start(uri string) error {
+func (v4Server) Start(uri string) error {
 	mu.Lock()
 	defer mu.Unlock()
 	closeStopChan()
@@ -45,7 +45,7 @@ func Start(uri string) error {
 	return nil
 }
 
-func Stop() {
+func (v4Server) Stop() {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -57,11 +57,17 @@ func Stop() {
 	closeStopChan()
 }
 
-func Reload(uri string) error {
-	Stop()
-	return Start(uri)
+func (s *v4Server) Reload(uri string) error {
+	s.Stop()
+	return s.Start(uri)
 }
 
-func IsRunning() bool {
+func (v4Server) IsRunning() bool {
 	return _server != nil
+}
+
+type v4Server struct{}
+
+func New() *v4Server {
+	return &v4Server{}
 }

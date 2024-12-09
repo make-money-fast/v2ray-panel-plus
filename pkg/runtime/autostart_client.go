@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
-	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
 	"log"
 )
 
@@ -18,5 +17,5 @@ func AutoStart() {
 		log.Println("[warning] [自启]: ActiveRuntimeConfigFile ", err)
 		return
 	}
-	_ = client.Start(path)
+	_ = Start(path)
 }

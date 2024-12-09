@@ -97,6 +97,7 @@ type KCPConfig struct {
 	ReadBufferSize  uint32            `json:"readBufferSize,omitempty"`
 	WriteBufferSize uint32            `json:"writeBufferSize,omitempty"`
 	HeaderConfig    map[string]string `json:"header"`
+	Seed            string            `json:"seed"`
 }
 
 type WebSocketConfig struct {

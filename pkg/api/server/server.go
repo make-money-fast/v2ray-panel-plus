@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/vo"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
-	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/ufw"
 	"github.com/samber/lo"
 )
@@ -35,7 +35,7 @@ func Reload(ctx *gin.Context) {
 		sendError(ctx, err)
 		return
 	}
-	if err := client.Reload(path); err != nil {
+	if err := runtime.Reload(path); err != nil {
 		sendError(ctx, err)
 		return
 	}

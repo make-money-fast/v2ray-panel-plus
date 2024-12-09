@@ -6,7 +6,7 @@ import (
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/api/client"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/pac"
-	client2 "github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/client"
+	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/system"
 	"time"
 )
@@ -28,7 +28,7 @@ func main() {
 		fmt.Println("testing ok")
 		return
 	}
-
+	runtime.InitServer(runtime.V5)
 	conf.InitDefaultConfigFile()
 	conf.InitLocalConfig()
 	pac.InitGfw(conf.GetGfwPath())
@@ -49,7 +49,7 @@ func runNoUI() {
 		if err != nil {
 			return
 		}
-		err = client2.Start(path)
+		err = runtime.Start(path)
 		if err != nil {
 			return
 		}

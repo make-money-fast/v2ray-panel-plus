@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -27,4 +29,12 @@ func WriteJSONFile(filename string, v interface{}, intend ...bool) error {
 		return err
 	}
 	return os.WriteFile(filename, data, 0755)
+}
+
+func ReadJSONObj(reader io.Reader, obj interface{}) error {
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, obj)
 }
