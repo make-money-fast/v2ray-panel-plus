@@ -17,11 +17,6 @@
       "protocol": "blackhole",
       "settings": {},
       "tag": "blocked"
-    },
-    {
-      "protocol": "mtproto",
-      "settings": {},
-      "tag": "tg-out"
     }
   ],
   "dns": {
@@ -52,13 +47,6 @@
           "fe80::/10"
         ],
         "outboundTag": "blocked"
-      },
-      {
-        "type": "field",
-        "inboundTag": [
-          "tg-in"
-        ],
-        "outboundTag": "tg-out"
       },
       {
         "type": "field",

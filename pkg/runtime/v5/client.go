@@ -1,9 +1,10 @@
 package v5
 
 import (
-	core "github.com/clearcodecn/v2ray-core"
+	core "github.com/make-money-fast/v2ray-core-v5"
 	"github.com/make-money-fast/v2ray-core-v5/v2start"
 	"sync"
+	"time"
 )
 
 var (
@@ -40,6 +41,7 @@ func (v5Server) Stop() {
 
 func (s *v5Server) Reload(uri string) error {
 	s.Stop()
+	time.Sleep(300 * time.Millisecond)
 	return s.Start(uri)
 }
 

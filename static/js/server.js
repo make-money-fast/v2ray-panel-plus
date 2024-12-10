@@ -60,11 +60,12 @@ new Vue({
             this.editConfig = Object.assign({}, item)
             console.log(this.editConfig)
             this.configDrawer = true;
+            this.editConfig.add = false
             console.log(item)
         },
         async handleAddClick() {
             this.editConfig = {}
-            this.editConfig.uuid = await this.getUUID();
+            this.editConfig.add = true
             this.editConfig.id = await this.getUUID();
             this.configDrawer = true;
         },
@@ -114,8 +115,7 @@ new Vue({
                     return
                 }
                 let rsp;
-                console.log(this.editConfig);
-                if (this.editConfig.uuid === "") {
+                if (this.editConfig.add) {
                     rsp = await this.post("/api/server/add", this.editConfig)
                 } else {
                     rsp = await this.post("/api/server/edit", this.editConfig)

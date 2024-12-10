@@ -12,6 +12,7 @@ import (
 )
 
 type ServerInbound struct {
+	Tag            string         `json:"tag"`
 	Port           int            `json:"port"`
 	Protocol       string         `json:"protocol"`
 	Settings       Settings       `json:"settings"`
@@ -21,8 +22,8 @@ type ServerInbound struct {
 
 type Client struct {
 	Id      string `json:"id"`
-	Level   int    `json:"level"`
-	AlterId int    `json:"alterId"`
+	Level   int    `json:"level,omitempty"`
+	AlterId int    `json:"alterId,omitempty"`
 }
 
 type Settings struct {

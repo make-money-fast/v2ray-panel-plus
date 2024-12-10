@@ -1,6 +1,8 @@
 package runtime
 
-import v4 "github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/v4"
+import (
+	v5 "github.com/make-money-fast/v2ray-panel-plus/pkg/runtime/v5"
+)
 
 const (
 	V4 = iota + 1
@@ -20,10 +22,10 @@ type Server interface {
 
 func InitServer(version int) {
 	switch version {
-	case V4:
-		_server = v4.New()
+	//case V4:
+	//_server = v4.New()
 	default:
-		_server = v4.New()
+		_server = v5.New()
 	}
 }
 

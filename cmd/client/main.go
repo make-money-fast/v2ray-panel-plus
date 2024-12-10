@@ -11,6 +11,7 @@ import (
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/pac"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/runtime"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/system"
+	"github.com/samber/lo"
 	"time"
 )
 
@@ -50,15 +51,34 @@ func runNoUI() {
 	// 检测上次运行配置.
 	status, err := conf.GetRunningStatus()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	if status.RunningUUID != "" {
 		path, err := conf.ActiveRuntimeConfigFile(status.RunningUUID)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 		err = runtime.Start(path)
 		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		configs, err := conf.GetConfigList()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		lo.ForEach(configs, func(item *conf.ClientConfig, index int) {
+			if item.UUID == status.RunningUUID {
+				item.Status = conf.StatusStart
+			} else {
+				item.Status = conf.StatusDown
+			}
+		})
+		if err := conf.SaveConfigList(configs); err != nil {
+			fmt.Println(err)
 			return
 		}
 	}

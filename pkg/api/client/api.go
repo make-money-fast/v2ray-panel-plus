@@ -163,7 +163,7 @@ func reload(ctx *gin.Context) {
 		return
 	}
 
-	if err := runtime.Start(path); err != nil {
+	if err := runtime.Reload(path); err != nil {
 		sendError(ctx, errors.Wrap(err, "启动服务失败"))
 		return
 	}
@@ -345,7 +345,7 @@ func importVmess(ctx *gin.Context) {
 
 	clientConfig.Outbounds[0].Settings.Vnext[0].Users[0].Id = link.Id
 	clientConfig.Outbounds[0].Settings.Vnext[0].Users[0].Id = link.Id
-	clientConfig.Outbounds[0].Settings.Vnext[0].Address = link.Host
+	clientConfig.Outbounds[0].Settings.Vnext[0].Address = link.Address
 	clientConfig.Outbounds[0].Settings.Vnext[0].Port = str2Int(link.Port)
 	clientConfig.Outbounds[0].StreamSettings.Network = link.Network
 	clientConfig.Outbounds[0].StreamSettings.Security = link.Tls

@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/clearcodecn/v2ray-core/common/net"
+	"net"
 	"net/http"
 	"net/url"
 	"time"

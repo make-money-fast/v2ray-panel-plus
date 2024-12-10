@@ -2,6 +2,7 @@ package vo
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/make-money-fast/v2ray-panel-plus/pkg/conf"
 	"strconv"
 )
@@ -48,6 +49,7 @@ func (req *EditConfigRequest) ToConfig() *conf.ServerConfig {
 	item.Host = conf.GetIP()
 	item.Type = req.Type
 	item.Config = &conf.ServerInbound{
+		Tag:      fmt.Sprintf("%s_%d", req.Protocol, port),
 		Port:     port,
 		Protocol: "vmess",
 		Settings: conf.Settings{
@@ -60,7 +62,13 @@ func (req *EditConfigRequest) ToConfig() *conf.ServerConfig {
 			},
 		},
 		StreamSettings: nil,
-		Sniffing:       conf.Sniffing{},
+		Sniffing: conf.Sniffing{
+			Enabled: true,
+			DestOverride: []string{
+				"tls",
+				"http",
+			},
+		},
 	}
 	stream := &conf.StreamSetting{
 		Network: item.Protocol,
@@ -76,11 +84,28 @@ func (req *EditConfigRequest) ToConfig() *conf.ServerConfig {
 	if item.Protocol == "ws" {
 		stream.WSConfig = &conf.WebSocketConfig{}
 	}
+	/**
+	"mtu": 1350,
+	          "tti": 20,
+	          "uplinkCapacity": 5,
+	          "downlinkCapacity": 20,
+	          "congestion": false,
+	          "readBufferSize": 1,
+	          "writeBufferSize": 1,
+	          "header": {
+	            "type": "wechat-video"
+	          },
+	          "seed": ""
+	*/
 	if item.Protocol == "kcp" || item.Protocol == "mkcp" {
 		stream.KCPConfig = &conf.KCPConfig{
-			UpCap:      10,
-			DownCap:    100,
-			Congestion: true,
+			Mtu:             1350,
+			Tti:             20,
+			UpCap:           10,
+			DownCap:         100,
+			Congestion:      true,
+			ReadBufferSize:  10,
+			WriteBufferSize: 10,
 			HeaderConfig: map[string]string{
 				"type": req.Type,
 			},
